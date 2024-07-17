@@ -1,0 +1,47 @@
+services:
+  cassandra:
+    container_name: cassandra
+    image: cassandra:5.0
+    ports:
+      - "9042:9042"
+    environment:
+      - "MAX_HEAP_SIZE=256M"
+      - "HEAP_NEWSIZE=128M"
+    volumes:
+      - ./docker/compose/cassandra.yaml:/etc/cassandra/cassandra.yaml
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "cqlsh", "-u cassandra", "-p cassandra" ,"-e describe keyspaces" ]
+      interval: 10s
+      timeout: 10s
+      retries: 15
+
+  cassandra-load-keyspace:
+    container_name: cassandra-load-keyspace
+    image: cassandra:5.0
+    depends_on:
+      cassandra:
+        condition: service_healthy
+    volumes:
+      - ./cql/schema.cql:/schema.cql
+      - ./cql/data-samples.cql:/data-samples.cql
+    command: /bin/bash -c "
+        echo loading keyspace
+        && cqlsh cassandra -f /schema.cql
+        && echo loading sample data...
+        && cqlsh cassandra -f /data-samples.cql
+      "
+
+
+  # Jaeger
+  jaeger-all-in-one:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "16686:16686" # Jaeger UI
+      - "14268:14268" # Receive legacy OpenTracing traces, optional
+      - "4317:4317"   # OTLP gRPC receiver
+      - "4318:4318"   # OTLP HTTP receiver, not yet used by Quarkus, optional
+      - "14250:14250" # Receive from external otel-collector, optional
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+
