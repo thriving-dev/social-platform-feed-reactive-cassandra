@@ -8,6 +8,10 @@ Code from this repository was featured on [WeAreDevelopers World Congress 2024](
 
 You can find more information on: https://thriving.dev/talks/maximising-cassandras-potential-2024
 
+### Perf Sneak Peak - OTEL Trace
+
+![Screenshot of an OpenTelemetry Trace of the main `GET feeds/{feedId}/posts` endpoint, showing parallel queries to Cassandra and a total response time of 3.72ms](screenshots/Screenshot%202024-06-24%20at%2020.23.07.png)
+
 ### Tech Stack
 - [Kotlin](https://kotlinlang.org/)
 - [Quarkus](https://quarkus.io/)
